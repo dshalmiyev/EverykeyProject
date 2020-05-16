@@ -1,5 +1,9 @@
 package com.cwruride.everykeyproject;
 
+import org.jetbrains.annotations.NotNull;
+
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -11,6 +15,7 @@ public class ISSRequest {
 
     private double longitude;
     private double latitude;
+    private String output;
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private OkHttpClient client = new OkHttpClient();
 
@@ -24,11 +29,21 @@ public class ISSRequest {
     }
 
     String get(String url) throws IOException {
+
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-        Response response = client.newCall(request).execute();
-        return response.body().string();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                e.printStackTrace();
+            }
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                output = response.body().string();
+            }
+        });
+        return output;
     }
 
     public String sendRequest() throws IOException {
